@@ -11,6 +11,7 @@ from urllib.request import urlopen, urlretrieve, URLError
 from PIL import Image
 
 from .util import eprint, get_default_love_binary_dir, get_download_url
+from .hooks import execute_target_hook
 
 
 def download_love(version, platform):
@@ -157,6 +158,9 @@ def get_info_plist_content(config, version):
 
 
 def build_macos(config, version, target, target_directory, love_file_path):
+    if target in config and config[target]["hook"]:
+        print("Executing hook {} for target {}".format(config[target]["hook"], target))
+        execute_target_hook(config[target]["hook"], target)
     if target in config and "love_binaries" in config[target]:
         love_binaries = config[target]["love_binaries"]
     else:

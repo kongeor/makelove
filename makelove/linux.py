@@ -12,6 +12,7 @@ import appdirs
 
 from .util import fuse_files, tmpfile, parse_love_version, ask_yes_no
 from .config import all_love_versions, should_build_artifact
+from .hooks import execute_target_hook
 
 
 def get_appimagetool_path():
@@ -240,6 +241,9 @@ def build_linux(config, version, target, target_directory, love_file_path):
         elif os.path.isfile(appdir("lib/liblove.so")):
             # Official AppImages (since 11.4)
             so_target_dir = appdir("lib/")
+        elif os.path.isfile(appdir("lib/liblove-{}.so".format(config["love_version"]))):
+            # Support for >= 11.5
+            so_target_dir = appdir("lib/")
         else:
             sys.exit(
                 "Could not find liblove.so in AppDir. The AppImage has an unknown format."
@@ -247,6 +251,11 @@ def build_linux(config, version, target, target_directory, love_file_path):
 
         for f in config[target]["shared_libraries"]:
             shutil.copy(f, so_target_dir)
+
+    # A hook to execute before bundling AppImage again
+    if target in config and config[target]["hook"]:
+        print("Executing hook {} for target {}".format(config[target]["hook"], target))
+        execute_target_hook(config[target]["hook"], target)
 
     # Rebuild AppImage
     if should_build_artifact(config, target, "appimage", True):

@@ -70,6 +70,7 @@ config_params = {
             "love_binaries": val.Path(),
             "shared_libraries": val.List(val.Path()),
             "artifacts": val.ValueOrList(val.Choice("directory", "archive")),
+            "hook": val.String(),
         }
     ),
     "win64": val.Section(
@@ -77,6 +78,7 @@ config_params = {
             "love_binaries": val.Path(),
             "shared_libraries": val.List(val.Path()),
             "artifacts": val.ValueOrList(val.Choice("directory", "archive")),
+            "hook": val.String(),
         }
     ),
     "linux": val.Section(
@@ -87,6 +89,7 @@ config_params = {
             "source_appimage": val.Path(),
             "shared_libraries": val.List(val.Path()),
             "artifacts": val.ValueOrList(val.Choice("appdir", "appimage")),
+            "hook": val.String(),
         }
     ),
     "macos": val.Section(
@@ -95,6 +98,7 @@ config_params = {
             "icon_file": val.Path(),
             "app_metadata": val.Dict(val.String(), val.String()),
             "archive_files": val.Dict(val.Path(), val.Path()),
+            "hook": val.String(),
         }
     ),
     "lovejs": val.Section(
