@@ -234,6 +234,9 @@ def build_windows(config, version, target, target_directory, love_file_path):
         archive_files.update(config["archive_files"])
     if "windows" in config and "archive_files" in config["windows"]:
         archive_files.update(config["windows"]["archive_files"])
+    # also add win32/win64 files
+    if target in config and "archive_files" in config[target]:
+        archive_files.update(config[target]["archive_files"])
 
     for k, v in archive_files.items():
         path = dest(v)
@@ -248,11 +251,6 @@ def build_windows(config, version, target, target_directory, love_file_path):
     if target in config and "shared_libraries" in config[target]:
         for f in config[target]["shared_libraries"]:
             shutil.copyfile(f, dest(os.path.basename(f)))
-
-    # A hook to execute before building the zip file
-    if target in config and config[target]["hook"]:
-        print("Executing hook {} for target {}".format(config[target]["hook"], target))
-        execute_target_hook(config[target]["hook"], target)
 
     if should_build_artifact(config, target, "archive", True):
         archive_path = os.path.join(

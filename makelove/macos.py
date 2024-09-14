@@ -158,9 +158,6 @@ def get_info_plist_content(config, version):
 
 
 def build_macos(config, version, target, target_directory, love_file_path):
-    if target in config and config[target]["hook"]:
-        print("Executing hook {} for target {}".format(config[target]["hook"], target))
-        execute_target_hook(config[target]["hook"], target)
     if target in config and "love_binaries" in config[target]:
         love_binaries = config[target]["love_binaries"]
     else:
@@ -247,3 +244,11 @@ def build_macos(config, version, target, target_directory, love_file_path):
 
         loveZipKey = f"{config['name']}.app/Contents/Resources/{config['name']}.love"
         app_zip.writestr(loveZipKey, love_zip.read())
+
+    # default behavior is to create an archive
+    if "directory" in config[target]["artifacts"]:
+        unzip_dst = os.path.join(target_directory, f"{config['name']}-{target}")
+        with ZipFile(dst, "r") as zip_ref:
+            zip_ref.extractall(unzip_dst)
+        os.remove(dst)
+    

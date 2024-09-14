@@ -144,6 +144,8 @@ def build_linux(config, version, target, target_directory, love_file_path):
 
     appdir_path = os.path.join(target_directory, "squashfs-root")
     appdir = lambda x: os.path.join(appdir_path, x)
+    appdirbin_path = os.path.join(appdir_path, "bin")
+    appdirbin = lambda x: os.path.join(appdirbin_path, x)
 
     game_name = config["name"]
     if " " in game_name:
@@ -233,6 +235,24 @@ def build_linux(config, version, target, target_directory, love_file_path):
         for k, v in desktop_file_fields.items():
             f.write("{}={}\n".format(k, v))
 
+    # archive files
+    archive_files = {}
+    if "archive_files" in config:
+        archive_files.update(config["archive_files"])
+    if target in config and "archive_files" in config[target]:
+        archive_files.update(config[target]["archive_files"])
+
+    for k, v in archive_files.items():
+        path = appdirbin(v)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if os.path.isfile(k):
+            shutil.copyfile(k, path)
+        elif os.path.isdir(k):
+            shutil.copytree(k, path)
+        else:
+            sys.exit("Cannot copy archive file '{}'".format(k))
+
+
     # Shared libraries
     if target in config and "shared_libraries" in config[target]:
         if os.path.isfile(appdir("usr/lib/liblove.so")):
@@ -251,11 +271,6 @@ def build_linux(config, version, target, target_directory, love_file_path):
 
         for f in config[target]["shared_libraries"]:
             shutil.copy(f, so_target_dir)
-
-    # A hook to execute before bundling AppImage again
-    if target in config and config[target]["hook"]:
-        print("Executing hook {} for target {}".format(config[target]["hook"], target))
-        execute_target_hook(config[target]["hook"], target)
 
     # Rebuild AppImage
     if should_build_artifact(config, target, "appimage", True):
