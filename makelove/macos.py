@@ -246,7 +246,7 @@ def build_macos(config, version, target, target_directory, love_file_path):
         app_zip.writestr(loveZipKey, love_zip.read())
 
     # default behavior is to create an archive
-    if "artifacts" in config[target] and "directory" in config[target]["artifacts"]:
+    if target in config and "artifacts" in config[target] and "directory" in config[target]["artifacts"]:
         unzip_dst = os.path.join(target_directory, f"{config['name']}-{target}")
         with ZipFile(dst, "r") as zip_ref:
             zip_ref.extractall(unzip_dst)
